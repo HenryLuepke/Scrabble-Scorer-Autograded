@@ -33,27 +33,95 @@ function oldScrabbleScorer(word) {
 // don't change the names or your program won't work as expected. //
 
 function initialPrompt() {
-   console.log("Let's play some scrabble! Enter a word:");
+   let word = input.question("Let's play some scrabble! Enter a word: ");
+   while (!/^[a-zA-Z\s]*$/.test(word)) {
+      word = input.question("Only letters are accepatable in Scrabble! Please try again: ")
+   }
+
+   return word
 };
 
-let newPointStructure;
+let newPointStructure = transform(oldPointStructure);
 
-let simpleScorer;
+function simpleScorer(word) {
+   return word.length;
+};
 
-let vowelBonusScorer;
+function vowelBonusScorer(word) {
+   let vowels = ['a', 'e', 'i', 'o', 'u'];
+   let score = 0;
+   for (let i = 0; i < word.length; i++) {
+      if (vowels.includes(word[i])) {
+         score += 3
+      } else {
+         score++
+      }
+   }
 
-let scrabbleScorer;
+   return score;
+};
 
-const scoringAlgorithms = [];
+function scrabbleScorer(word) {
+   let score = 0;
+   for (let i = 0; i < word.length; i++) {
+      let char = word[i].toLowerCase();
+      score += newPointStructure[char]; //ask about why dot notation didn't work here
+   }
 
-function scorerPrompt() {}
+   return score;
+};
 
-function transform() {};
+const scoringAlgorithms = [
+   simpleScorer = {
+      name: 'Simple Score',
+      description: 'Each letter is worth 1 point.',
+      scorerFunction: simpleScorer
+   },
+   vowelBonusScorer = {
+      name: 'Bonus Vowels',
+      description: 'Vowels are 3 pts, consonants are 1 pt.',
+      scorerFunction: vowelBonusScorer
+   },
+   scrabbleScorer = {
+      name: 'Scrabble',
+      description: 'The traditional scoring algorithm.',
+      scorerFunction: scrabbleScorer
+   }
+];
+
+function scorerPrompt(scoreArr) {
+   let userInput = input.question(`Which scoring algorithm would you like to use?
+
+      0 - ${scoringAlgorithms[0].name}: ${scoringAlgorithms[0].description}
+      1 - ${scoringAlgorithms[1].name}: ${scoringAlgorithms[1].description}
+      2 - ${scoringAlgorithms[2].name}: ${scoringAlgorithms[2].description}
+      Enter 0, 1, or 2: `);
+   while (isNaN(userInput) || userInput < 0 || userInput > 2) {
+      userInput = input.question('Invalid input. Please enter 0 , 1, or 2: ')
+   }
+   return scoreArr[userInput]
+}
+
+function transform(obj) {
+   let newObject = {}
+   for (let key in obj) {
+      for (let i = 0; i < obj[key].length; i++) {
+         newObject[obj[key][i].toLowerCase()] = Number(key);
+      }
+   }
+
+   newObject[' '] = 0;
+
+   return newObject
+};
 
 function runProgram() {
-   initialPrompt();
-   
+   let userWord = initialPrompt();
+   let userAlg = scorerPrompt(scoringAlgorithms)
+   console.log(`Score for '${userWord}': ${userAlg.scorerFunction(userWord)}`)
 }
+
+//ask about why tests fail
 
 // Don't write any code below this line //
 // And don't change these or your program will not run as expected //
